@@ -14,9 +14,8 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
     
-    - name: Build App (Skip Terminal/Ghostty)
+    - name: Build App
       run: |
-        # Kita cuma build target "DynamicNotch" (UI-nya aja), bukan "notch-browser" (yang ada terminal-nya)
         xcodebuild -project notch-browser/notch-browser.xcodeproj \
                    -scheme "DynamicNotchDemo" \
                    -configuration Release \
@@ -25,11 +24,13 @@ jobs:
                    CODE_SIGNING_REQUIRED=NO \
                    CLEAN_BEFORE_BUILD=YES
         
+        # Kita ambil seluruh isi folder build_output/Build/Products/Release/
+        # Biar semua file binary-nya ikut kebawa
         mkdir -p dist
-        find build_output -name "*.app" -exec cp -R {} dist/DynamicNotch.app \;
+        cp -R build_output/Build/Products/Release/ dist/
     
     - name: Archive Production Build
       uses: actions/upload-artifact@v4
       with:
         name: DynamicNotch-App
-        path: dist/DynamicNotch.app
+        path: dist/
