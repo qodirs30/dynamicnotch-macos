@@ -14,24 +14,19 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
     
-    - name: Build App Brutally
+    - name: Build App (Skip Terminal/Ghostty)
       run: |
-        # Cari file .xcodeproj secara otomatis di manapun dia berada
-        PROJECT_PATH=$(find . -name "*.xcodeproj" | head -n 1)
-        echo "Found project at: $PROJECT_PATH"
-        
-        # Build pakai perintah paling umum
-        xcodebuild -project "$PROJECT_PATH" \
-                   -alltargets \
+        # Kita cuma build target "DynamicNotch" (UI-nya aja), bukan "notch-browser" (yang ada terminal-nya)
+        xcodebuild -project notch-browser/notch-browser.xcodeproj \
+                   -scheme "DynamicNotchDemo" \
                    -configuration Release \
+                   -derivedDataPath build_output \
                    CODE_SIGNING_ALLOWED=NO \
                    CODE_SIGNING_REQUIRED=NO \
-                   clean build
+                   CLEAN_BEFORE_BUILD=YES
         
-        # Cari file .app hasil build
         mkdir -p dist
-        find . -name "*.app" | grep "Release" | head -n 1 > app_path.txt
-        cp -R $(cat app_path.txt) dist/DynamicNotch.app
+        find build_output -name "*.app" -exec cp -R {} dist/DynamicNotch.app \;
     
     - name: Archive Production Build
       uses: actions/upload-artifact@v4
